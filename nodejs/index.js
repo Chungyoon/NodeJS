@@ -1,35 +1,31 @@
-// basicServer.js
-var oHttp = require('http'),
-	oUrl = require('url'),
-	oExp = require('express');
+var express = require('express'),
+	app = express(),
+	router = express.Router();
+	
+var http = require('http');
 
-oHttp.createServer(function (req, res) {
+// server setting		
+app.set('port', 1977);
+app.use(router);
 
+app.use('/', routes);
+app.use('/users', users);
+
+
+출처: https://urban41.tistory.com/10 [URBAN41]
+
+// 오류 처리
+app.use(function(req, res, next){
 	debugger;
+	throw new Error(req.url + ' not found.');
+});
 
-	var sUrl = req.url,
-		sQuery = oUrl.parse(sUrl, true).query,
-		sMethod = req.method;
-	
-	if(sUrl == "/favicon.ico"){
-		return;		
-	}
-	
-	switch (sMethod){
-		case 'GET' :
-			break;
+app.use(function(err, req, res, next){
+	console.log(err);
+	res.send(err.message);
+});
 
-		case 'POST' :
-			break;
+http.createServer(app).listen(app.get('port'), function(){
+	console.log("Server running on port" + app.get('port'));
+});
 
-		default:
-			break;
-	}
-
-    res.writeHead(200, {'Content-Type': 'text/html'});
-
-    res.end('Hello World');
-
-}).listen(1977);
-
-console.log('Server running at http://127.0.0.1:1977/');
