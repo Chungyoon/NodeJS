@@ -9,7 +9,11 @@ oHttp.createServer(function (req, res) {
 	var sUrl = req.url,
 		sQuery = oUrl.parse(sUrl, true).query,
 		sMethod = req.method;
-
+	
+	if(sUrl == "/favicon.ico"){
+		return;		
+	}
+	
 	switch (sMethod){
 		case 'GET' :
 			break;
