@@ -1,7 +1,7 @@
 // basicServer.js
 var oHttp = require('http'),
 	oUrl = require('url'),
-	oExp = require('multiparty');
+	oExp = require('express');
 
 oHttp.createServer(function (req, res) {
 
