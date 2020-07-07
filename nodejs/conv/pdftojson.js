@@ -1,3 +1,5 @@
+"use strict";
+
 var express = require('express'),
 	router = express.Router(),
 	multer = require('multer'),
@@ -11,11 +13,23 @@ var express = require('express'),
 		destination : function(req, file, callback){
 			
 			debugger;
+
 			var defaultFolderPath = 'pdfFiles/';
+
+			// 폴더 생성 (기존 폴더가 없을 경우만 생성)
+			f_mkdir(defaultFolderPath);
+
+			/*
 			fs.mkdir(defaultFolderPath, function(error){
-				return;
-				console.log("already Exists folder!!");
+				debugger;
+				
+				if(error){
+					console.log("already Exists folder!!");
+					return;
+				}
+				
 			});
+			*/
 
 			// 저장할 폴더 설정
 			callback(null, defaultFolderPath);
@@ -43,10 +57,22 @@ var express = require('express'),
 		https://victorydntmd.tistory.com/39 참조
 	*/
 
+router.get("/pdftest", f_conf_pdf_test);
+router.post("/pdftest", f_conf_pdf_test);
+
 router.get("/pdf", f_conv_pdf_to_json);
 router.post("/pdf", f_conv_pdf_to_json);
+
 router.post("/pdftojson", upload.any(), f_fileUpload);
-router.post("/pdfdown", uploadStorage.array('dgpdf'), f_pdfDown);
+//router.post("/pdfdown", uploadStorage.array('pdffile'), f_pdfDown);
+router.post("/pdfdown", uploadStorage.any(), f_pdfDown);
+
+function f_conf_pdf_test(req, res, next){
+	debugger;
+
+	res.send("pdf test call!!");
+
+}
 
 function f_conv_pdf_to_json(req, res, next){
 	debugger;
@@ -84,7 +110,13 @@ function f_pdfDown(req, res, next){
     */
 	let extension = path.extname(file.originalname),
 		basename = path.basename(file.originalname, extension),
-		pdfJsonPath = 'jsonFiles/' + basename + '.json';
+		defaultJsonFolderPath = 'jsonFiles/',
+		pdfJsonPath =  defaultJsonFolderPath + basename + '.json';
+
+	debugger;
+
+	// 폴더 생성 (기존 폴더가 없을 경우만 생성)
+	f_mkdir(defaultJsonFolderPath);
 
     PDFParser.on("pdfParser_dataError", function(errData){ 
     	debugger;
@@ -119,6 +151,24 @@ function f_pdfDown(req, res, next){
 
     //res.setHeader('Content-Type', 'application/json');
     //res.send(JSON.stringify(pdfData));
+
+}
+
+function f_mkdir(sPath){
+	debugger;
+
+	fs.mkdir(sPath, function(error){
+		debugger;
+		
+		if(error){
+			console.log("already Exists folder!!");
+			return;
+		}
+		else {
+			console.log("create folder to " + sPath);
+		}
+		
+	});
 
 }
 

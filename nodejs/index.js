@@ -1,4 +1,6 @@
-﻿var express = require('express'),
+﻿"use strict";
+
+var express = require('express'),
 	app = express(),
 	router = express.Router(),	
 	convPdf = require('./conv/pdftojson.js');
@@ -15,6 +17,8 @@ app.use("/conv", convPdf);
 // 오류 처리
 // app.use(); 로 등록되지 않은 Path는 무조건 타는 메소드
 app.use(function(req, res, next){
+	
+	debugger;
 
 	var sUrl = req.url;
 	if(sUrl == "/favicon.ico"){
@@ -27,6 +31,8 @@ app.use(function(req, res, next){
 
 // new Error로 던지면 이 메소드를 탄다.
 app.use(function(err, req, res, next){
+	
+	debugger;
 
 	console.log(err);
 	res.send(err.message);
@@ -41,7 +47,12 @@ app.listen(1977, function(req, res){
 });
 
 /*
-http.createServer(app).listen(app.get('port'), function(){
+http.createServer(app).listen(app.get('port'), function(res, req){
+	
+	console.log('hello world!!');
+	
+	req.send('hello world!!');
+
 	console.log("Server running on port" + app.get('port'));
 });
 */
