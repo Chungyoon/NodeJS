@@ -8,7 +8,9 @@
 // server setting		
 app.set('port', 1977);
 
+// path 등록
 app.use("/conv", convPdf);
+
 
 // 오류 처리
 // app.use(); 로 등록되지 않은 Path는 무조건 타는 메소드
