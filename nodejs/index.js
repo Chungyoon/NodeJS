@@ -2,13 +2,17 @@
 
 var express = require('express'),
 	app = express(),
-	router = express.Router(),	
+	router = express.Router(),
+	cors = require('cors'),	
 	convPdf = require('./conv/pdftojson.js');
 	
 //var http = require('http');
 
 // server setting		
 app.set('port', 1977);
+
+// CORS 설정
+app.use(cors());
 
 // path 등록
 app.use("/conv", convPdf);

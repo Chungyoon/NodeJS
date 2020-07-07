@@ -19,18 +19,6 @@ var express = require('express'),
 			// 폴더 생성 (기존 폴더가 없을 경우만 생성)
 			f_mkdir(defaultFolderPath);
 
-			/*
-			fs.mkdir(defaultFolderPath, function(error){
-				debugger;
-				
-				if(error){
-					console.log("already Exists folder!!");
-					return;
-				}
-				
-			});
-			*/
-
 			// 저장할 폴더 설정
 			callback(null, defaultFolderPath);
 
@@ -50,12 +38,8 @@ var express = require('express'),
 		}
 	});
 
-	var uploadStorage = multer({ storage : storage });
 
-	/*
-		폴더를 지정해서 파일을 저장하는 방법 
-		https://victorydntmd.tistory.com/39 참조
-	*/
+var uploadStorage = multer({ storage : storage });
 
 router.get("/pdftest", f_conf_pdf_test);
 router.post("/pdftest", f_conf_pdf_test);
@@ -129,6 +113,9 @@ function f_pdfDown(req, res, next){
     		if(error == null){
 
     			console.log('PDF to JSON Convert Success!!');
+    			
+
+    			res.json(JSON.stringify(pdfData));
     			
     			res.status(200);
     			res.setHeader('Content-Type', 'application/json');
