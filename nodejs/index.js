@@ -16,8 +16,6 @@ app.use("/conv", convPdf);
 // app.use(); 로 등록되지 않은 Path는 무조건 타는 메소드
 app.use(function(req, res, next){
 
-	debugger;
-
 	var sUrl = req.url;
 	if(sUrl == "/favicon.ico"){
 		return;		
@@ -29,8 +27,6 @@ app.use(function(req, res, next){
 
 // new Error로 던지면 이 메소드를 탄다.
 app.use(function(err, req, res, next){
-	
-	debugger;
 
 	console.log(err);
 	res.send(err.message);
