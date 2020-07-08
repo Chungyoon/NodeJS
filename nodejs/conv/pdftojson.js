@@ -11,8 +11,6 @@ var express = require('express'),
 	//uploadPdf = multer({ dest: 'uploads/' }), //<-- 폴더를 생성해서 파일을 저장한다.
 	storage = multer.diskStorage({
 		destination : function(req, file, callback){
-			
-			debugger;
 
 			var defaultFolderPath = 'pdfFiles/';
 
@@ -24,8 +22,6 @@ var express = require('express'),
 
 		},
 		filename : function(req, file, callback){
-			
-			debugger;
 
 			// 저장할 파일이름 설정
 			var extension = path.extname(file.originalname),
@@ -79,7 +75,18 @@ function f_pdfDown(req, res, next){
 	/*
 	*	PDF File SAVE
 	*/
+
+	if(req.files == null){
+		next('error');
+		return;
+	}
+
     let file = req.files[0];
+
+    if(file == null){
+    	next('error');
+    	return;
+    }
 
     let result = {
         originalName : file.originalname,
@@ -97,8 +104,6 @@ function f_pdfDown(req, res, next){
 		defaultJsonFolderPath = 'jsonFiles/',
 		pdfJsonPath =  defaultJsonFolderPath + basename + '.json';
 
-	debugger;
-
 	// 폴더 생성 (기존 폴더가 없을 경우만 생성)
 	f_mkdir(defaultJsonFolderPath);
 
@@ -108,18 +113,18 @@ function f_pdfDown(req, res, next){
     });    
 
     PDFParser.on("pdfParser_dataReady", function(pdfData){ 	
-    	fs.writeFile(pdfJsonPath, JSON.stringify(pdfData), function(error){
+    	fs.writeFile(pdfJsonPath, JSON.stringify(pdfData.formImage.Pages), function(error){
     		debugger;
     		if(error == null){
 
     			console.log('PDF to JSON Convert Success!!');
     			
-
-    			res.json(JSON.stringify(pdfData));
+    			//res.status(200);
+    			//res.setHeader('Content-Type', 'application/json');
+    			//res.setHeader('Cache-Control', 'no-cache');
     			
-    			res.status(200);
-    			res.setHeader('Content-Type', 'application/json');
-    			res.send(JSON.stringify(pdfData));
+    			res.json(JSON.stringify(pdfData.formImage.Pages));
+    			//res.send(JSON.stringify(pdfData.formImage.Pages));
 
     		}
     		else {
@@ -128,7 +133,7 @@ function f_pdfDown(req, res, next){
     		
     		//res.writeHead('200', { 'Content-type': 'text/html;charset=utf8' });
     		//res.writeHead('200');
-    		res.end();
+    		//res.end();
 
     	});
     });
@@ -141,11 +146,10 @@ function f_pdfDown(req, res, next){
 
 }
 
+// 전달받은 sPath의 경로대로 폴더를 생성 하는 function
 function f_mkdir(sPath){
-	debugger;
 
 	fs.mkdir(sPath, function(error){
-		debugger;
 		
 		if(error){
 			console.log("already Exists folder!!");
