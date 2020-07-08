@@ -108,19 +108,17 @@ function f_pdfDown(req, res, next){
     });    
 
     PDFParser.on("pdfParser_dataReady", function(pdfData){ 	
-    	fs.writeFile(pdfJsonPath, JSON.stringify(pdfData), function(error){
+    	fs.writeFile(pdfJsonPath, JSON.stringify(pdfData.formImage.Pages), function(error){
     		debugger;
+    	
     		if(error == null){
 
     			console.log('PDF to JSON Convert Success!!');
     			
-
-    			res.json(JSON.stringify(pdfData));
-    			
     			res.status(200);
     			res.setHeader('Content-Type', 'application/json');
-    			res.send(JSON.stringify(pdfData));
-
+    			res.json(JSON.stringify(pdfData.formImage.Pages));
+    			//res.end('종료다');
     		}
     		else {
     			console.log(error);
@@ -128,7 +126,7 @@ function f_pdfDown(req, res, next){
     		
     		//res.writeHead('200', { 'Content-type': 'text/html;charset=utf8' });
     		//res.writeHead('200');
-    		res.end();
+    		
 
     	});
     });
