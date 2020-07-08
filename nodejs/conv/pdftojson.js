@@ -11,8 +11,6 @@ var express = require('express'),
 	//uploadPdf = multer({ dest: 'uploads/' }), //<-- 폴더를 생성해서 파일을 저장한다.
 	storage = multer.diskStorage({
 		destination : function(req, file, callback){
-			
-			debugger;
 
 			var defaultFolderPath = 'pdfFiles/';
 
@@ -24,8 +22,6 @@ var express = require('express'),
 
 		},
 		filename : function(req, file, callback){
-			
-			debugger;
 
 			// 저장할 파일이름 설정
 			var extension = path.extname(file.originalname),
@@ -79,15 +75,16 @@ function f_pdfDown(req, res, next){
 	/*
 	*	PDF File SAVE
 	*/
+
+	if (req.files == null) { next({message : '파일이 없습니다.'}); }
     let file = req.files[0];
+
+    if (file == null) { next({message : '파일이 없습니다.'}); }
 
     let result = {
         originalName : file.originalname,
         size : file.size,
     }
-
-    //res.json(result);
-
 
     /*
     *	PDF TO JSON CONVERT
@@ -96,8 +93,6 @@ function f_pdfDown(req, res, next){
 		basename = path.basename(file.originalname, extension),
 		defaultJsonFolderPath = 'jsonFiles/',
 		pdfJsonPath =  defaultJsonFolderPath + basename + '.json';
-
-	debugger;
 
 	// 폴더 생성 (기존 폴더가 없을 경우만 생성)
 	f_mkdir(defaultJsonFolderPath);
@@ -140,11 +135,9 @@ function f_pdfDown(req, res, next){
 }
 
 function f_mkdir(sPath){
-	debugger;
 
 	fs.mkdir(sPath, function(error){
-		debugger;
-		
+
 		if(error){
 			console.log("already Exists folder!!");
 			return;
