@@ -76,25 +76,15 @@ function f_pdfDown(req, res, next){
 	*	PDF File SAVE
 	*/
 
-	if(req.files == null){
-		next({message : "file이 없습니다."});
-		return;
-	}
-
+	if (req.files == null) { next({message : '파일이 없습니다.'}); }
     let file = req.files[0];
 
-    if(file == null){
-    	next({message : "file이 없습니다."});
-    	return;
-    }
+    if (file == null) { next({message : '파일이 없습니다.'}); }
 
     let result = {
         originalName : file.originalname,
         size : file.size,
     }
-
-    //res.json(result);
-
 
     /*
     *	PDF TO JSON CONVERT
@@ -115,17 +105,15 @@ function f_pdfDown(req, res, next){
     PDFParser.on("pdfParser_dataReady", function(pdfData){ 	
     	fs.writeFile(pdfJsonPath, JSON.stringify(pdfData.formImage.Pages), function(error){
     		debugger;
+    	
     		if(error == null){
 
     			console.log('PDF to JSON Convert Success!!');
     			
-    			//res.status(200);
-    			//res.setHeader('Content-Type', 'application/json');
-    			//res.setHeader('Cache-Control', 'no-cache');
-    			
+    			res.status(200);
+    			res.setHeader('Content-Type', 'application/json');
     			res.json(JSON.stringify(pdfData.formImage.Pages));
-    			//res.send(JSON.stringify(pdfData.formImage.Pages));
-
+    			//res.end('종료다');
     		}
     		else {
     			console.log(error);
@@ -133,7 +121,7 @@ function f_pdfDown(req, res, next){
     		
     		//res.writeHead('200', { 'Content-type': 'text/html;charset=utf8' });
     		//res.writeHead('200');
-    		//res.end();
+    		
 
     	});
     });
@@ -146,11 +134,10 @@ function f_pdfDown(req, res, next){
 
 }
 
-// 전달받은 sPath의 경로대로 폴더를 생성 하는 function
 function f_mkdir(sPath){
 
 	fs.mkdir(sPath, function(error){
-		
+
 		if(error){
 			console.log("already Exists folder!!");
 			return;
