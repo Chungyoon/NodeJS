@@ -77,14 +77,14 @@ function f_pdfDown(req, res, next){
 	*/
 
 	if(req.files == null){
-		next('error');
+		next({message : "file이 없습니다."});
 		return;
 	}
 
     let file = req.files[0];
 
     if(file == null){
-    	next('error');
+    	next({message : "file이 없습니다."});
     	return;
     }
 
