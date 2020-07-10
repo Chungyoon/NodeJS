@@ -43,8 +43,10 @@ router.post("/pdftest", f_conf_pdf_test);
 router.get("/pdf", f_conv_pdf_to_json);
 router.post("/pdf", f_conv_pdf_to_json);
 
+router.get("/pdftojson", upload.any, f_fileUpload_Get);
 router.post("/pdftojson", upload.any(), f_fileUpload);
 //router.post("/pdfdown", uploadStorage.array('pdffile'), f_pdfDown);
+router.get("/pdfdown", uploadStorage.any(), f_pdfDownGet);
 router.post("/pdfdown", uploadStorage.any(), f_pdfDown);
 
 function f_conf_pdf_test(req, res, next){
@@ -61,10 +63,23 @@ function f_conv_pdf_to_json(req, res, next){
 
 }
 
+function f_fileUpload_Get(req, res, next){
+	debugger;
+	
+	next({message : "f_fileUpload_Get get!!!"});
+}
+
 function f_fileUpload(req, res, next){
 	debugger;
 	
 	var aFiles = req.files;
+
+}
+
+function f_pdfDownGet(req, res, next){
+	
+	debugger;
+
 
 }
 
