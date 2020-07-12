@@ -91,10 +91,10 @@ function f_pdfDown(req, res, next){
 	*	PDF File SAVE
 	*/
 
-	if (req.files == null) { next({message : '파일이 없습니다.'}); }
+	if (req.files == null) { next({message : '파일이 없습니다.'}); return;}
     let file = req.files[0];
 
-    if (file == null) { next({message : '파일이 없습니다.'}); }
+    if (file == null) { next({message : '파일이 없습니다.'}); return;}
 
     let result = {
         originalName : file.originalname,
