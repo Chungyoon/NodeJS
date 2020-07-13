@@ -4,6 +4,7 @@ var express = require('express'),
 	app = express(),
 	router = express.Router(),
 	cors = require('cors'),	
+	bodyParser = require('body-parser'),  //<-- post로 던졌을때 http body를 파싱해주는 모듈
 	convPdf = require('./conv/pdftojson.js');
 	
 //var http = require('http');
@@ -13,6 +14,12 @@ app.set('port', 1977);
 
 // CORS 설정
 app.use(cors());
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ limit: "1mb", extended: false }));
+
+// parse application/json
+app.use(bodyParser.json());
 
 // path 등록
 app.use("/conv", convPdf);
