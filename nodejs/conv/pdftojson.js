@@ -37,6 +37,7 @@ var express = require('express'),
 
 var uploadStorage = multer({ storage : storage });
 
+// url path 등록 및 callback function 지정
 router.get("/pdftest", f_conf_pdf_test);
 router.post("/pdftest", f_conf_pdf_test);
 
@@ -66,7 +67,7 @@ function f_conv_pdf_to_json(req, res, next){
 function f_fileUpload_Get(req, res, next){
 	debugger;
 	
-	next({message : "f_fileUpload_Get get!!!"});
+	next({ message : "f_fileUpload_Get get!!!" });
 }
 
 function f_fileUpload(req, res, next){
@@ -91,10 +92,10 @@ function f_pdfDown(req, res, next){
 	*	PDF File SAVE
 	*/
 
-	if (req.files == null) { next({message : '파일이 없습니다.'}); return;}
+	if (req.files == null) { next({ message : '파일이 없습니다.' }); return; }
     let file = req.files[0];
 
-    if (file == null) { next({message : '파일이 없습니다.'}); return;}
+    if (file == null) { next({ message : '파일이 없습니다.' }); return; }
 
     let result = {
         originalName : file.originalname,
@@ -149,6 +150,7 @@ function f_pdfDown(req, res, next){
 
 }
 
+// 디렉토리 생성
 function f_mkdir(sPath){
 
 	fs.mkdir(sPath, function(error){
