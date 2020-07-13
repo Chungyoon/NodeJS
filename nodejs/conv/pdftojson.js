@@ -5,7 +5,7 @@ var express = require('express'),
 	multer = require('multer'),
 	upload = multer(),
 	pdf2json = require('pdf2json'),
-	PDFParser = new pdf2json(),
+	//PDFParser = new pdf2json(), <-- PDF 파싱 하려면 로컬 변수로 만들어서 해야함.(전역변수 선언 절대 X)
 	fs = require('fs'),
 	path = require('path'),
 	multipart = require('connect-multiparty'),
@@ -39,6 +39,10 @@ var express = require('express'),
 
 var uploadStorage = multer({ storage : storage });
 
+/* 
+	## URL Path 등록 
+		- URL Path별, GET/POST 별 callback function 지정
+*/ 
 router.get("/pdftest", f_conf_pdf_test);
 router.post("/pdftest", f_conf_pdf_test);
 
@@ -52,6 +56,11 @@ router.get("/pdfdown", uploadStorage.any(), f_pdfDownGet);
 router.post("/pdfdown", uploadStorage.any(), f_pdfDown);
 router.post('/pdfmulti', multipartyMiddle, f_pdfmulty);
 
+
+/* 
+	## callback Funtions 
+		- Url Path 별 callback function
+*/
 function f_conf_pdf_test(req, res, next){
 	debugger;
 
@@ -73,82 +82,55 @@ function f_fileUpload_Get(req, res, next){
 }
 
 function f_fileUpload(req, res, next){
-	debugger;
-	
+	debugger;	
 	var aFiles = req.files;
-
 }
 
-function f_pdfDownGet(req, res, next){
-	
+function f_pdfDownGet(req, res, next){	
 	debugger;
-
-
 }
 
 function f_pdfmulty(req, res, next){
 	debugger;
 
+	var pdfParse = new pdf2json();
+
 	var oBody = req.body,
 		sFile = oBody.files,
 		aFiles = JSON.parse(sFile);
 
+	var buf = Buffer.from(aFiles[0].CONTENT, 'hex');
 
-		
+	pdfParse.parseBuffer(buf);
 
-	/*
-	var src = fs.createReadStream(ofilePath);
+	pdfParse.on("pdfParser_dataError", function(errData){ 
+    	debugger;
+    	console.error(errData.parserError);     	
+    });
 
-	src.on('open', function(a,b,c,d,e){
-		debugger;
+    pdfParse.on("pdfParser_dataReady", function(pdfData){ 	
+    	debugger;
 
-	});
+    	var ojson = JSON.stringify(pdfData.formImage.Pages);
 
-	src.on('data', function(data){
-		debugger;
+    	res.status(200);
+		res.setHeader('Content-Type', 'application/json');
+    	res.json(ojson);
 
-		//var buf = new Buffer(data, 'base64');
+    	//응답 종료
+        res.end(); 
 
-		var buf = Buffer.from(data);
+    });    
 
-
-		
-		var oFile = fs.writeFile('aaa.pdf', buf, 'binary', function(err){
-
-			if(err){
-				console.log("file Write error!!");
-				next({message : "file Write error!!"});
-				return;
-			}
-			else {
-				next({message : "file Write Success!!!"});
-				console.log("file Write Success!!!");
-			}
-
-			return;
-
-		});
-
-	});
-
-	src.on('end', function() { 
-		debugger;
-		return;
-		//res.render('complete'); 
-	});
-
-	src.on('error', function(err) { 
-		debugger;
-		res.render('error'); 
-	});	
-	*/
-
-	/*
-	next({ message : "f_pdfmulty!!!" });		
-	return;
-	*/
 }
 
+/* 
+	pdf to json (Ajax 버전)
+
+	## 기능
+	- 특정 폴더에 PDF 파일을 저장
+	- 특정 폴더에 저장된 PDF 파일을 읽어서 JSON 파일 생성
+*/
 function f_pdfDown(req, res, next){
 	
 	debugger;
@@ -175,15 +157,17 @@ function f_pdfDown(req, res, next){
 		defaultJsonFolderPath = 'jsonFiles/',
 		pdfJsonPath =  defaultJsonFolderPath + basename + '.json';
 
+	let pdfParse = new pdf2json();
+
 	// 폴더 생성 (기존 폴더가 없을 경우만 생성)
 	f_mkdir(defaultJsonFolderPath);
 
-    PDFParser.on("pdfParser_dataError", function(errData){ 
+    pdfParse.on("pdfParser_dataError", function(errData){ 
     	debugger;
     	console.error(errData.parserError);     	
     });    
 
-    PDFParser.on("pdfParser_dataReady", function(pdfData){ 	
+    pdfParse.on("pdfParser_dataReady", function(pdfData){ 	
     	fs.writeFile(pdfJsonPath, JSON.stringify(pdfData.formImage.Pages), function(error){
     		debugger;
     	
@@ -201,20 +185,21 @@ function f_pdfDown(req, res, next){
     		}
     		
     		//res.writeHead('200', { 'Content-type': 'text/html;charset=utf8' });
-    		//res.writeHead('200');
-    		
+    		//res.writeHead('200');  		
 
     	});
     });
 
     // PDF file Load
-    PDFParser.loadPDF(file.path);
+    pdfParse.loadPDF(file.path);
 
     //res.setHeader('Content-Type', 'application/json');
     //res.send(JSON.stringify(pdfData));
 
 }
 
+
+// 특정 경로에 폴더 생성하는 function
 function f_mkdir(sPath){
 
 	fs.mkdir(sPath, function(error){
