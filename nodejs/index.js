@@ -16,7 +16,7 @@ app.set('port', 1977);
 app.use(cors());
 
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ limit: "50mb", extended: false }));
+app.use(bodyParser.urlencoded({ limit: "1mb", extended: false }));
 
 // parse application/json
 app.use(bodyParser.json());

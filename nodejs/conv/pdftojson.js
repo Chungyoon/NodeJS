@@ -10,6 +10,7 @@ var express = require('express'),
 	path = require('path'),
 	multipart = require('connect-multiparty'),
 	multipartyMiddle = multipart(),
+	unescapeJs = require('unescape-js'), // <-- unescape 처리 모듈 (필요없음)
 	//uploadPdf = multer({ dest: 'uploads/' }), //<-- 폴더를 생성해서 파일을 저장한다.
 	storage = multer.diskStorage({
 		destination : function(req, file, callback){
@@ -112,10 +113,11 @@ function f_pdfmulty(req, res, next){
     	debugger;
 
     	var ojson = JSON.stringify(pdfData.formImage.Pages);
+    	var decode = decodeURIComponent(ojson);
 
     	res.status(200);
 		res.setHeader('Content-Type', 'application/json');
-    	res.json(ojson);
+    	res.json(decode);
 
     	//응답 종료
         res.end(); 
