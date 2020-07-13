@@ -8,6 +8,8 @@ var express = require('express'),
 	PDFParser = new pdf2json(),
 	fs = require('fs'),
 	path = require('path'),
+	multipart = require('connect-multiparty'),
+	multipartyMiddle = multipart(),
 	//uploadPdf = multer({ dest: 'uploads/' }), //<-- 폴더를 생성해서 파일을 저장한다.
 	storage = multer.diskStorage({
 		destination : function(req, file, callback){
@@ -48,6 +50,7 @@ router.post("/pdftojson", upload.any(), f_fileUpload);
 //router.post("/pdfdown", uploadStorage.array('pdffile'), f_pdfDown);
 router.get("/pdfdown", uploadStorage.any(), f_pdfDownGet);
 router.post("/pdfdown", uploadStorage.any(), f_pdfDown);
+router.post('/pdfmulti', multipartyMiddle, f_pdfmulty);
 
 function f_conf_pdf_test(req, res, next){
 	debugger;
@@ -81,6 +84,69 @@ function f_pdfDownGet(req, res, next){
 	debugger;
 
 
+}
+
+function f_pdfmulty(req, res, next){
+	debugger;
+
+	var oBody = req.body,
+		sFile = oBody.files,
+		aFiles = JSON.parse(sFile);
+
+
+		
+
+	/*
+	var src = fs.createReadStream(ofilePath);
+
+	src.on('open', function(a,b,c,d,e){
+		debugger;
+
+	});
+
+	src.on('data', function(data){
+		debugger;
+
+		//var buf = new Buffer(data, 'base64');
+
+		var buf = Buffer.from(data);
+
+
+		
+		var oFile = fs.writeFile('aaa.pdf', buf, 'binary', function(err){
+
+			if(err){
+				console.log("file Write error!!");
+				next({message : "file Write error!!"});
+				return;
+			}
+			else {
+				next({message : "file Write Success!!!"});
+				console.log("file Write Success!!!");
+			}
+
+			return;
+
+		});
+
+	});
+
+	src.on('end', function() { 
+		debugger;
+		return;
+		//res.render('complete'); 
+	});
+
+	src.on('error', function(err) { 
+		debugger;
+		res.render('error'); 
+	});	
+	*/
+
+	/*
+	next({ message : "f_pdfmulty!!!" });		
+	return;
+	*/
 }
 
 function f_pdfDown(req, res, next){
