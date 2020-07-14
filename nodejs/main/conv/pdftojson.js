@@ -2,42 +2,37 @@
 
 let express = require('express'),
 	router = express.Router(),
-	pdf2json = require('pdf2json');
-	
+	pdf2json = require('pdf2json');	
 
 /* 
 	## URL Path 등록 
 		- URL Path별, GET/POST 별 callback function 지정
 */ 
-
 router.post('/pdfjson', f_pdftojson);
 
 /* 
 	## callback Funtions 
 		- Url Path 별 callback function
 */
-
 function f_pdftojson(req, res, next){
 
 	let oBody = req.body,
 		sFile = oBody.files,
 		aFiles = JSON.parse(sFile),
 		iFileLen = aFiles.length,
-		aPromise = [],
-		aJsonData = [];
+		aPromise = [];
 		
 	if(iFileLen == 0){
-		f_return('E', 'File not Exists!');
+		f_return('E', 'File not Exists!', next);
 		return;
 	}
-	
-	debugger;
 
 	for(var i = 0; i < iFileLen; i++){
+
 		let oFile = aFiles[i];
 
-		var oPromi = new Promise(function (resolve, reject){
-			f_ParsePDFtoJson(oFile, iFileLen, resolve, reject);
+		let oPromi = new Promise(function (resolve, reject){
+			f_ParsePDFtoJson(oFile, iFileLen, next, resolve, reject);
 		});
 
 		aPromise.push(oPromi);
@@ -45,94 +40,90 @@ function f_pdftojson(req, res, next){
 	}
 
 	Promise.all(aPromise).then(function(value){
-		debugger;
 
-		var returnJson = JSON.stringify(value);
+		let returnJson = JSON.stringify(value);
 
-		res.status(200);
-		res.setHeader('Content-Type', 'application/json');
-		res.json(returnJson);
-
-		//응답 종료
-    	res.end(); 
+		f_return("S", returnJson, next);
 
 	})
 	.catch(function(errData){
+
 		debugger;
 
-		f_return('E', 'PDF Parse Error!!');
+		f_return('E', errData.parserError, next);
 
-		//응답 종료
-    	res.end(); 
-
-		//reject(errData);
 	});
-
-    /*
-    res.status(200);
-	res.setHeader('Content-Type', 'application/json');
-	res.json(decode);
-
-	//응답 종료
-    res.end(); 
-    */
 
 }
 
-function f_ParsePDFtoJson(oFile, iFileLen, resolve, reject){
+function f_ParsePDFtoJson(oFile, iFileLen, next, resolve, reject){
 
-	let pdfParse = new pdf2json();
-
-	let buf = Buffer.from(oFile.CONTENT, 'hex');
+	let pdfParse = new pdf2json(),
+		buf = Buffer.from(oFile.CONTENT, 'hex');
 
 	pdfParse.parseBuffer(buf);
 
-	pdfParse.on("pdfParser_dataError", function(errData){ 
-
-    	reject(errData); // promise error
-    	f_return('E', 'PDF Parsing Error!!');   // error response
-    	return;
-    });
-
+	// PDF를 JSON으로 파싱 성공한 경우 실행되는 callback Function
     pdfParse.on("pdfParser_dataReady", function(pdfData){ 	
-   		
-    	let ojson = JSON.stringify(pdfData.formImage.Pages);
-    	let decode = decodeURIComponent(ojson);
+   
+   		// PDF의 페이지 정보를 JSON 변환	
+   		let oPageInfo = JSON.stringify(pdfData.formImage.Pages),
 
+   		// Encoding 되어 있는 Text를 Decoding
+			oDecJson = decodeURIComponent(oPageInfo);
+
+		// PDF에서 Text 정보만 추출	
+   		let aExtractTxt = f_extractTextData(JSON.parse(oDecJson));
+
+   		// 파일 정보 구성
     	let convFile = oFile;
-    	convFile.CONVJSON = decode;
+    	convFile.CONVJSON = aExtractTxt;
+
+    	// 파일의 Content 데이터 삭제 (데이터 용량 때문)
     	if(convFile.CONTENT){
     		delete convFile.CONTENT;
     	}
 
     	resolve(convFile);
 
-    	//return decode;
+    }); 
 
-    	/*
-    	oJsonData.push(decode);
+    // PDF를 JSON으로 파싱 실패한 경우 실행되는 callback Function
+    pdfParse.on("pdfParser_dataError", function(errData){ 
 
-    	if(oJsonData.length == iFileLen){
-    		res.status(200);
-			res.setHeader('Content-Type', 'application/json');
-			res.json(JSON.stringify(oJsonData));
+    	reject(errData); // promise error
 
-			//응답 종료
-		    res.end(); 
-    		return;
-    	}
-		*/
-    });    
+    	return;
+    });   
 }
 
 function f_return(retType, retMsg, next){
+
 	let oRetObj = {
-		retType : retType,
-		retMsg : retMsg
+		RETTYPE : retType,
+		RETMSG : retMsg
 	}
 
 	next(oRetObj);
 
+}
+
+function f_extractTextData(aPages){	
+
+	let aTexts = [];
+
+	let iPageLen = aPages.length;
+	for(var i = 0; i < iPageLen; i++){
+		let aText = aPages[i].Texts,
+			iTextLen = aText.length;
+
+		for(var j = 0; j < iTextLen; j++){
+			let oText = aText[j].R[0].T;
+			aTexts.push(oText);
+		}	
+	}
+
+	return aTexts;
 }
 
 module.exports = router;

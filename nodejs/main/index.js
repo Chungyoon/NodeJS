@@ -42,8 +42,9 @@ app.use(function(err, req, res, next){
 	
 	debugger;
 
-	console.log(err);
-	res.send(err.message);
+	//console.log(err);
+
+	res.send(JSON.stringify(err));
 	res.end();
 
 });
