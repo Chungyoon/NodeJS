@@ -2,7 +2,7 @@
 
 let express = require('express'),
 	router = express.Router(),
-	pdf2json = require('pdf2json');	
+	pdf2json = require('pdf2json');
 
 /* 
 	## URL Path 등록 
@@ -30,7 +30,12 @@ function f_pdftojson(req, res, next){
 	for(var i = 0; i < iFileLen; i++){
 
 		let oFile = aFiles[i];
-
+		
+		if(oFile.MIME != "application/pdf"){
+			f_return('E', 'Only PDF files are allowed!', next);
+			return;
+		}
+		
 		let oPromi = new Promise(function (resolve, reject){
 			f_ParsePDFtoJson(oFile, iFileLen, next, resolve, reject);
 		});
@@ -42,13 +47,13 @@ function f_pdftojson(req, res, next){
 	Promise.all(aPromise).then(function(value){
 
 		let returnJson = JSON.stringify(value);
-
+		
+		returnJson = decodeURIComponent(returnJson);
+		
 		f_return("S", returnJson, next);
 
 	})
 	.catch(function(errData){
-
-		debugger;
 
 		f_return('E', errData.parserError, next);
 
@@ -60,20 +65,14 @@ function f_ParsePDFtoJson(oFile, iFileLen, next, resolve, reject){
 
 	let pdfParse = new pdf2json(),
 		buf = Buffer.from(oFile.CONTENT, 'hex');
-
+	
 	pdfParse.parseBuffer(buf);
 
 	// PDF를 JSON으로 파싱 성공한 경우 실행되는 callback Function
     pdfParse.on("pdfParser_dataReady", function(pdfData){ 	
-   
-   		// PDF의 페이지 정보를 JSON 변환	
-   		let oPageInfo = JSON.stringify(pdfData.formImage.Pages),
-
-   		// Encoding 되어 있는 Text를 Decoding
-			oDecJson = decodeURIComponent(oPageInfo);
-
+	
 		// PDF에서 Text 정보만 추출	
-   		let aExtractTxt = f_extractTextData(JSON.parse(oDecJson));
+   		let aExtractTxt = f_extractTextData(pdfData.formImage.Pages);
 
    		// 파일 정보 구성
     	let convFile = oFile;
@@ -94,6 +93,7 @@ function f_ParsePDFtoJson(oFile, iFileLen, next, resolve, reject){
     	reject(errData); // promise error
 
     	return;
+		
     });   
 }
 
@@ -110,9 +110,9 @@ function f_return(retType, retMsg, next){
 
 function f_extractTextData(aPages){	
 
-	let aTexts = [];
-
-	let iPageLen = aPages.length;
+	let aTexts = [],
+		iPageLen = aPages.length;
+		
 	for(var i = 0; i < iPageLen; i++){
 		let aText = aPages[i].Texts,
 			iTextLen = aText.length;
