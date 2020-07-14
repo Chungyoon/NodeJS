@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-var express = require('express'),
+let express = require('express'),
 	app = express(),
 	port = 1977,
 	router = express.Router(),
@@ -25,7 +25,7 @@ app.use("/conv", convPdf);
 // app.use(); 로 등록되지 않은 Path는 무조건 타는 메소드
 app.use(function(req, res, next){
 
-	var sUrl = req.url;
+	let sUrl = req.url;
 	if(sUrl == "/favicon.ico"){
 		return;		
 	}
