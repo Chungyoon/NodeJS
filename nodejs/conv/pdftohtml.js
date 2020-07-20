@@ -13,7 +13,57 @@ let express = require('express'),
 router.get("/pdf2html", f_pdf2html);
 //router.get("/pdfhtml", f_pdfhtml);
 router.get("/pdfreader", f_pdfReader);
+router.get("/pdfformat", f_pdfformat);
 
+function f_pdfformat(req, res, next){
+	debugger;
+
+	const nbCols = 2;
+	const cellPadding = 40; // each cell is padded to fit 40 characters
+	const columnQuantitizer = item => parseFloat(item.x) >= 20;
+	 
+	const padColumns = (array, nb) =>
+	  Array.apply(null, { length: nb }).map((val, i) => array[i] || []);
+	// .. because map() skips undefined elements
+	 
+	const mergeCells = cells =>
+	  (cells || [])
+	    .map(cell => cell.text)
+	    .join("#") // merge cells
+	    .substr(0, cellPadding)
+	    .padEnd(cellPadding, " "); // padding
+	 
+	const renderMatrix = matrix =>
+	  (matrix || [])
+	    .map((row, y) =>
+	      padColumns(row, nbCols)
+	        .map(mergeCells)
+	        .join(" | ")
+	    )
+	    .join("\n");
+	 
+	var table = new pdfreader.TableParser();
+	 
+	new pdfreader.PdfReader().parseFileItems("./abab.pdf", function(err, item) {
+		if (!item || item.page) {
+
+			if(item == null){
+				console.log("- END -");
+				return;
+			}
+			// end of file, or page
+			console.log(renderMatrix(table.getMatrix()));
+			console.log("PAGE:", item.page);
+			table = new pdfreader.TableParser(); // new/clear table for next page
+		} 
+		else if (item.text) {
+			// accumulate text items into rows object, per line
+			table.processItem(item, columnQuantitizer(item));
+		}
+	});
+
+
+}
 
 function f_pdfReader(req, res, next){
 	debugger;
@@ -23,7 +73,7 @@ function f_pdfReader(req, res, next){
 	function printRows() {
 		Object.keys(rows) // => array of y-positions (type: float)
 		.sort((y1, y2) => parseFloat(y1) - parseFloat(y2)) // sort float positions
-		.forEach(y => console.log((rows[y] || []).join("#")));
+		.forEach(y => console.log((rows[y] || []).join(" ")));
 	}
 
 	new pdfreader.PdfReader().parseFileItems("./abab.pdf", function(err, item) {

@@ -6,7 +6,9 @@ var express = require('express'),
 	cors = require('cors'),	
 	bodyParser = require('body-parser'),  //<-- post로 던졌을때 http body를 파싱해주는 모듈
 	convPdf = require('./conv/pdftojson.js'),
-	pdf2html = 	require('./conv/pdftohtml.js');
+	pdf2html = 	require('./conv/pdftohtml.js'),
+	img2txt = require('./conv/imgtotxt.js');
+
 //var http = require('http');
 
 // server setting		
@@ -24,6 +26,7 @@ app.use(bodyParser.json());
 // path 등록
 app.use("/conv", convPdf);
 app.use("/conv", pdf2html);
+app.use("/conv", img2txt);
 
 // 오류 처리
 // app.use(); 로 등록되지 않은 Path는 무조건 타는 메소드
