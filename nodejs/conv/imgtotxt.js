@@ -11,17 +11,19 @@ function f_img2txt(req, res, next){
 
 var Tesseract = require('tesseract.js');
 
-var filename = 'sample.jpg';
-filename = 'https://www.jindo.go.kr/uploads/board/2016/07/201701091923481191.jpg';
+var filename = './sample.jpg';
+//filename = 'https://www.jindo.go.kr/uploads/board/2016/07/201701091923481191.jpg';
 
 try {
 
 Tesseract.recognize(
   filename,
-  'kor',
+  'eng',
   { logger: m => console.log(m) }
 ).then(({ data: { text } }) => {
+	
   console.log(text);
+  
 })
 	/*
   	Tesseract.recognize(filename, {
