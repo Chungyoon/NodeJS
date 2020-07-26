@@ -32,24 +32,38 @@ app.use("/conv", img2txt);
 // app.use(); 로 등록되지 않은 Path는 무조건 타는 메소드
 app.use(function(req, res, next){
 	
-	debugger;
-
-	var sUrl = req.url;
+	let sUrl = req.url;
+	
 	if(sUrl == "/favicon.ico"){
 		return;		
 	}
+	
+	let oRetObj = {
+		RETTYPE : 'E',
+		RETMSG : "[URL Path Error] " + req.url + ' not found.'
+	}
+	
+	next(oRetObj);
 
-	throw new Error(req.url + ' not found.');
 
 });
 
 // new Error로 던지면 이 메소드를 탄다.
 app.use(function(err, req, res, next){
 	
-	debugger;
+	let oRetMsg = (err.RETTYPE == null ? {} : err);
 
-	console.log(err);
-	res.send(err.message);
+	if(err.RETTYPE == null){
+		oRetMsg.RETTYPE = "E";
+		oRetMsg.RETMSG = "[NODEJS] " + err.toString();
+	}
+	
+	let oRetJson = JSON.stringify(oRetMsg);
+	
+	console.log(oRetJson);
+	
+	res.send(oRetJson);
+	res.end();
 
 });
 

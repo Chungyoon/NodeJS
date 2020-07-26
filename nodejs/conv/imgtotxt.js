@@ -4,7 +4,41 @@ let express = require('express'),
 	router = express.Router();
 
 router.get("/img2txt", f_img2txt);
+router.post("/imgtotxt", f_imgtotxt);
 
+function f_imgtotxt(req, res, next){
+	debugger;
+	
+try {
+	
+	const { createWorker } = require('tesseract.js');
+	const path = require('path');
+	var oBody = req.body,
+		oFiles = oBody.files,
+		sFile = JSON.parse(oFiles),	
+		sImg = sFile[0].IMG_BASE64;
+	
+	const worker = createWorker({
+		logger: m => console.log(m),
+	});
+
+	(async () => {
+	await worker.load();
+	await worker.loadLanguage('eng+kor');
+	await worker.initialize('kor');	
+	const { data: { text } } = await worker.recognize(sImg);
+	console.log(text);
+	f_return('S', text, next);
+	await worker.terminate();
+	})();	
+		
+	}
+	catch(a){
+
+		f_return('E', a, next);
+		
+	}
+}
 
 function f_img2txt(req, res, next){
 	debugger;
@@ -116,5 +150,16 @@ tesseract.process('sample.jpg', (err, text) => {
 
 }
 
+
+function f_return(retType, retMsg, next){
+
+	let oRetObj = {
+		RETTYPE : retType,
+		RETMSG : retMsg
+	}
+
+	next(oRetObj);
+
+}
 
 module.exports = router;
